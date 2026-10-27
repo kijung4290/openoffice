@@ -1024,6 +1024,7 @@ const runSerializedSave = createSaveSerializer()
  * protected on disk) before the swap-triggered clear lands.
  */
 function discardStalePasswordIntents(): void {
+  if (!window.desktop) return
   // Start the IPC now, before the replacement document can record a password.
   // The destructive half stays serialized behind an old in-flight save.
   const throughRevision = window.desktop.docPasswordIntentRevision()

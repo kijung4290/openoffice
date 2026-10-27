@@ -41,7 +41,7 @@ function applyDocumentTheme(theme: DocTheme): void {
 }
 
 async function bootstrap(): Promise<void> {
-  let lang: Lang = 'zh'
+  let lang: Lang = window.desktop ? 'zh' : 'ko'
   let theme: UiTheme = 'system'
   let docTheme: DocTheme = 'follow'
   try {

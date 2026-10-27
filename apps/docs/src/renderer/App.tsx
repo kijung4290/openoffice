@@ -2207,7 +2207,14 @@ export function App() {
   )
 
   useEffect(() => {
-    if (!editor || !window.desktop) return
+    if (!editor) return
+    if (!window.desktop) {
+      if (!bootHandledRef.current) {
+        bootHandledRef.current = true
+        void resetFile()
+      }
+      return
+    }
     const unsubscribe = window.desktop.onOpenDocx((result) => {
       void commitOpenedFile(result)
     })
@@ -2821,7 +2828,7 @@ export function App() {
     if (headlessExportStartedRef.current) return
     headlessExportStartedRef.current = true
     void (async () => {
-      const target = await window.desktop.consumeHeadlessExport()
+      const target = await window.desktop?.consumeHeadlessExport()
       if (!target) return
       const report = await runHeadlessDocumentExport(
         target.outPath,
