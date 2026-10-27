@@ -1140,8 +1140,8 @@ export function App() {
   const [ctxMenu, setCtxMenu] = useState<ContextMenuState | null>(null)
   const ctxSeq = useRef(0)
   useEffect(() => {
-    window.desktop.armContextMenu?.()
-    return window.desktop.onContextMenuRequest?.((req) => {
+    window.desktop?.armContextMenu?.()
+    return window.desktop?.onContextMenuRequest?.((req) => {
       setCtxMenu((prev) =>
         prev && prev.seq === req.seq
           ? {
@@ -1155,7 +1155,7 @@ export function App() {
     })
   }, [])
   const [viewImage, setViewImage] = useState<string | null>(null)
-  useEffect(() => window.desktop.onViewImage?.((src) => setViewImage(src)), [])
+  useEffect(() => window.desktop?.onViewImage?.((src) => setViewImage(src)), [])
   const saveImageAs = useCallback((src: string) => void window.desktop.saveImageAs(src), [])
   const [showFontDialog, setShowFontDialog] = useState(false)
   const [fontDialogTab, setFontDialogTab] = useState<FontDialogTab>('font')
@@ -1578,6 +1578,7 @@ export function App() {
   )
 
   useEffect(() => {
+    if (!window.desktop) return
     void window.desktop.getRecentFiles().then(setRecent)
     const loadSettings = () => void window.desktop.getAiSettings().then(setSettings)
     loadSettings()
@@ -1916,12 +1917,12 @@ export function App() {
     document.title = doc ? doc.fileName : `${PRODUCT_NAME} Docs`
   }, [doc])
 
-  useEffect(() => window.desktop.onTeardown?.(() => setTornDown(true)), [])
+  useEffect(() => window.desktop?.onTeardown?.(() => setTornDown(true)), [])
 
   // keep the native View menu's checkmarks (AI Sidebar / Dark Mode) in sync
   // (the IPC field keeps its historical darkCanvas name)
   useEffect(() => {
-    window.desktop.reportViewMenuState?.({ aiSidebar: showAi, darkCanvas: darkPage, odt: odtDoc })
+    window.desktop?.reportViewMenuState?.({ aiSidebar: showAi, darkCanvas: darkPage, odt: odtDoc })
   }, [showAi, darkPage, odtDoc])
 
   // Crash-recovery copy: while the document is dirty, push a serialized copy
@@ -1949,11 +1950,11 @@ export function App() {
           running = false
         })
     }, 30_000)
-    const offNow = window.desktop.onWriteRecoveryNow?.((done) => {
+    const offNow = window.desktop?.onWriteRecoveryNow?.((done) => {
       void writeRecoveryCopyImpl(fileCtxRef.current, { force: true }).finally(done)
     })
     // a dropped copy whose close did not go through: the next tick copies again
-    const offDropped = window.desktop.onRecoveryCopyDropped?.(forgetRecoveryCopy)
+    const offDropped = window.desktop?.onRecoveryCopyDropped?.(forgetRecoveryCopy)
     return () => {
       window.clearInterval(timer)
       offNow?.()
@@ -2191,7 +2192,7 @@ export function App() {
   // file renamed externally (renamed in the shell Home list) → sync the save path and title-bar file name (content unchanged)
   useEffect(
     () =>
-      window.desktop.onRenamedDocx(({ oldPath, newPath }) => {
+      window.desktop?.onRenamedDocx(({ oldPath, newPath }) => {
         setDoc((prev) =>
           prev && prev.filePath === oldPath
             ? {
@@ -2206,7 +2207,7 @@ export function App() {
   )
 
   useEffect(() => {
-    if (!editor) return
+    if (!editor || !window.desktop) return
     const unsubscribe = window.desktop.onOpenDocx((result) => {
       void commitOpenedFile(result)
     })
@@ -2694,7 +2695,7 @@ export function App() {
 
   useEffect(
     () =>
-      window.desktop.onZoteroRequest(async (request) => {
+      window.desktop?.onZoteroRequest(async (request) => {
         try {
           const activeEditor = editorRef.current
           if (!activeEditor) throw new Error('No active GenOffice document')
@@ -5427,14 +5428,14 @@ export function App() {
 
   // close guard: the main process queries dirty state before closing a tab/window; choosing "Save" runs a full save and reports back
   useEffect(() => {
-    const offCheck = window.desktop.onCloseCheck?.(() => {
+    const offCheck = window.desktop?.onCloseCheck?.(() => {
       window.desktop.reportCloseCheck({
         dirty: !!doc && (anyDirtyRef.current || dirtyRef.current),
         autoSave: autoSave && !!doc?.filePath,
         filePath: doc?.filePath ?? null,
       })
     })
-    const offSave = window.desktop.onCloseSaveRequest?.(() => {
+    const offSave = window.desktop?.onCloseSaveRequest?.(() => {
       // Closing must not report success while edits are still unpersisted, so a
       // save that raced with typing is retried until the file catches up.
       // A pathless document's first save asks where: cancelling resolves false and
@@ -5745,7 +5746,7 @@ export function App() {
 
   // native application menu → renderer commands
   useEffect(() => {
-    return window.desktop.onMenuCommand((command, payload) => {
+    return window.desktop?.onMenuCommand((command, payload) => {
       const align = (value: 'left' | 'center' | 'right' | 'justify') =>
         editor && setSelectionAlign(editor, value)
       switch (command) {

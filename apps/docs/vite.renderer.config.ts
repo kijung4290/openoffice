@@ -9,6 +9,6 @@ export default defineConfig({
     port: Number(process.env.DOCS_DEV_PORT) || 5173,
     strictPort: true,
     // Allow only this preview endpoint; keep Vite host checks enabled.
-    allowedHosts: ['local--docs.previews.kosuke.ai'],
+    allowedHosts: ['local--docs.previews.kosuke.ai', '5173-i1bejfa4puh8om77xmq14.e2b.app'],
   },
 })
