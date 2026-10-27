@@ -10,6 +10,6 @@ export default defineConfig({
     port: Number(process.env.DOCS_DEV_PORT) || 5173,
     strictPort: true,
     // Resolve the exact runtime host; never allow every sandbox on a shared domain.
-    allowedHosts: previewHosts(process.env.PREVIEW_URL),
+    allowedHosts: previewHosts(process.env.DOCS_PREVIEW_URL ?? process.env.PREVIEW_URL),
   },
 })
