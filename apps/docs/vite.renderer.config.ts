@@ -1,5 +1,6 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import { previewHosts } from './preview-hosts'
 
 // renderer-only dev server (embedded by the shell via DOCS_RENDERER_URL for HMR; no standalone Electron)
 export default defineConfig({
@@ -8,7 +9,7 @@ export default defineConfig({
   server: {
     port: Number(process.env.DOCS_DEV_PORT) || 5173,
     strictPort: true,
-    // Allow only this preview endpoint; keep Vite host checks enabled.
-    allowedHosts: ['local--docs.previews.kosuke.ai', '5173-i1bejfa4puh8om77xmq14.e2b.app'],
+    // Resolve the exact runtime host; never allow every sandbox on a shared domain.
+    allowedHosts: previewHosts(process.env.PREVIEW_URL),
   },
 })
